@@ -5,3 +5,5 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     id("org.sonarqube") version "4.3.1.3277" apply false
 }
+
+apply(plugin = "org.sonarqube")
