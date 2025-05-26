@@ -1,0 +1,86 @@
+name: Release CI (Firebase Distribution)
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+
+jobs:
+  release-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - name: Decode keystore and create local.properties
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > app/cinescope-release-key.jks
+          echo "RELEASE_STORE_FILE=app/cinescope-release-key.jks" > local.properties
+          echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}" >> local.properties
+          echo "RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> local.properties
+          echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> local.properties
+
+      - name: Fetch all history for versioning
+        run: git fetch --prune --unshallow || true
+
+      - name: Set versionCode and versionName
+        run: |
+          BRANCH=${GITHUB_REF##*/}
+          if [[ "$BRANCH" == "main" ]]; then
+            VERSION_CODE=$(git rev-list --count HEAD)
+            VERSION_NAME="1.0.0"
+          elif [[ "$BRANCH" == "staging" ]]; then
+            VERSION_CODE=$(git rev-list --count origin/staging)
+            VERSION_NAME="1.0.0-pre-$VERSION_CODE"
+          else
+            VERSION_CODE=1
+            VERSION_NAME="1.0.0"
+          fi
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+
+      - name: Build APK
+        run: |
+          BRANCH=${GITHUB_REF##*/}
+          if [[ "$BRANCH" == "staging" ]]; then
+            ./gradlew assembleReleaseDebug -PversionCode=${VERSION_CODE} -PversionName=${VERSION_NAME}
+          elif [[ "$BRANCH" == "main" ]]; then
+            ./gradlew assembleRelease -PversionCode=${VERSION_CODE} -PversionName=${VERSION_NAME}
+          fi
+
+      - name: List APK files
+        run: ls -lR app/build/outputs/apk/
+
+      - name: Set APK Path
+        run: |
+          BRANCH=${GITHUB_REF##*/}
+          if [[ "$BRANCH" == "main" ]]; then
+            echo "APK_PATH=app/build/outputs/apk/release/app-release.apk" >> $GITHUB_ENV
+          elif [[ "$BRANCH" == "staging" ]]; then
+            echo "APK_PATH=app/build/outputs/apk/releaseDebug/app-releaseDebug.apk" >> $GITHUB_ENV
+          fi
+
+      - name: Upload APK to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          groups: testers
+          file: ${{ env.APK_PATH }}
