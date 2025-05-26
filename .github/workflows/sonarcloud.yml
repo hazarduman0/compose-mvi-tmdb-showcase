@@ -30,7 +30,7 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build project
-        run: ./gradlew build
+        run: ./gradlew assembleDebug
 
       - name: Generate JaCoCo coverage report
         run: ./gradlew jacocoViewModelUnitTestReport
