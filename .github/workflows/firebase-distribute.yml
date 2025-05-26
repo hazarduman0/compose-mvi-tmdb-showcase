@@ -72,11 +72,24 @@ jobs:
             ./gradlew assembleRelease -PversionCode=${VERSION_CODE} -PversionName=${VERSION_NAME}
           fi
 
+      - name: List APK files
+        run: ls -lR app/build/outputs/apk/
+
+      - name: Set APK Path
+        run: |
+          BRANCH=${GITHUB_REF##*/}
+          if [[ "$BRANCH" == "dev" ]]; then
+            echo "APK_PATH=app/build/outputs/apk/debug/app-debug.apk" >> $GITHUB_ENV
+          elif [[ "$BRANCH" == "staging" ]]; then
+            echo "APK_PATH=app/build/outputs/apk/releaseDebug/app-releaseDebug.apk" >> $GITHUB_ENV
+          elif [[ "$BRANCH" == "main" ]]; then
+            echo "APK_PATH=app/build/outputs/apk/release/app-release.apk" >> $GITHUB_ENV
+          fi
+
       - name: Upload APK to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           appId: ${{ secrets.FIREBASE_APP_ID }}
           groups: testers
-          file: |
-            $(if [[ "${GITHUB_REF##*/}" == "dev" ]]; then echo app/build/outputs/apk/debug/app-debug.apk; elif [[ "${GITHUB_REF##*/}" == "staging" ]]; then echo app/build/outputs/apk/releaseDebug/app-releaseDebug.apk; elif [[ "${GITHUB_REF##*/}" == "main" ]]; then echo app/build/outputs/apk/release/app-release.apk; fi)
+          file: ${{ env.APK_PATH }}
