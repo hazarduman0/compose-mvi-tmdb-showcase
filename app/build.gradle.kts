@@ -1,4 +1,5 @@
 import org.gradle.testing.jacoco.tasks.JacocoReport
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -15,24 +16,54 @@ android {
         applicationId = "com.hazarduman.cinescope"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = (project.findProperty("versionCode") as? String)?.toInt() ?: 1
+        versionName = project.findProperty("versionName") as? String ?: "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val props = Properties()
+            val file = rootProject.file("local.properties")
+            if (file.exists()) {
+                file.inputStream().use { props.load(it) }
+            }
+            val storeFilePath = props.getProperty("RELEASE_STORE_FILE")
+            val storePassword = props.getProperty("RELEASE_STORE_PASSWORD")
+            val keyAlias = props.getProperty("RELEASE_KEY_ALIAS")
+            val keyPassword = props.getProperty("RELEASE_KEY_PASSWORD")
+            if (!storeFilePath.isNullOrEmpty() && !storePassword.isNullOrEmpty() && !keyAlias.isNullOrEmpty() && !keyPassword.isNullOrEmpty()) {
+                storeFile = file(storeFilePath)
+                this.storePassword = storePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
+            }
+        }
+    }
+
     buildTypes {
-        release {
+        getByName("debug") {
+            enableUnitTestCoverage = true
+            versionNameSuffix = "-dev"
+        }
+        create("releaseDebug") {
+            initWith(getByName("release"))
+            isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
+            versionNameSuffix = "-pre"
+            /** Proguard, chucker etc.  **/
+        }
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
-        debug {
-            enableUnitTestCoverage = true
+            signingConfig = signingConfigs.getByName("release")
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
