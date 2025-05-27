@@ -1,12 +1,12 @@
-name: Dev CI (Sonar + Firebase Distribution)
+name: Staging CI (Firebase Distribution)
 
 on:
   push:
     branches:
-      - dev
+      - staging
 
 jobs:
-  dev-pipeline:
+  staging-pipeline:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,35 +28,24 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Build project
-        run: ./gradlew assembleDebug
-
-      - name: Generate JaCoCo coverage report
-        run: ./gradlew jacocoViewModelUnitTestReport
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5.0.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
       - name: Fetch all history for versioning
         run: git fetch --prune --unshallow || true
 
       - name: Set versionCode and versionName
         run: |
-          VERSION_CODE=$(git rev-list --count origin/dev)
-          VERSION_NAME="1.0.0-dev-$VERSION_CODE"
+          VERSION_CODE=$(git rev-list --count origin/staging)
+          VERSION_NAME="1.0.0-pre-$VERSION_CODE"
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
 
       - name: Build APK
-        run: ./gradlew assembleDebug -PversionCode=${VERSION_CODE} -PversionName=${VERSION_NAME}
+        run: ./gradlew assembleReleaseDebug -PversionCode=${VERSION_CODE} -PversionName=${VERSION_NAME}
 
       - name: List APK files
         run: ls -lR app/build/outputs/apk/
 
       - name: Set APK Path
-        run: echo "APK_PATH=app/build/outputs/apk/debug/app-debug.apk" >> $GITHUB_ENV
+        run: echo "APK_PATH=app/build/outputs/apk/releaseDebug/app-releaseDebug.apk" >> $GITHUB_ENV
 
       - name: Upload APK to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
