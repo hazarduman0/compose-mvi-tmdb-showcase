@@ -1,4 +1,4 @@
-name: Main CI (Firebase Distribution)
+name: Main CI (Release APK - Signed & Firebase Distribution)
 
 on:
   push:
@@ -30,8 +30,8 @@ jobs:
 
       - name: Decode keystore and create local.properties
         run: |
-          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > app/cinescope-release-key.jks
-          echo "RELEASE_STORE_FILE=app/cinescope-release-key.jks" > local.properties
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > $GITHUB_WORKSPACE/app/cinescope-release-key.jks
+          echo "RELEASE_STORE_FILE=$GITHUB_WORKSPACE/app/cinescope-release-key.jks" > local.properties
           echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}" >> local.properties
           echo "RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> local.properties
           echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> local.properties
