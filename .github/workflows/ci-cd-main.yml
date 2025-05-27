@@ -1,13 +1,12 @@
-name: Release CI (Firebase Distribution)
+name: Main CI (Firebase Distribution)
 
 on:
   push:
     branches:
       - main
-      - staging
 
 jobs:
-  release-pipeline:
+  main-pipeline:
     runs-on: ubuntu-latest
 
     steps:
@@ -42,40 +41,19 @@ jobs:
 
       - name: Set versionCode and versionName
         run: |
-          BRANCH=${GITHUB_REF##*/}
-          if [[ "$BRANCH" == "main" ]]; then
-            VERSION_CODE=$(git rev-list --count HEAD)
-            VERSION_NAME="1.0.0"
-          elif [[ "$BRANCH" == "staging" ]]; then
-            VERSION_CODE=$(git rev-list --count origin/staging)
-            VERSION_NAME="1.0.0-pre-$VERSION_CODE"
-          else
-            VERSION_CODE=1
-            VERSION_NAME="1.0.0"
-          fi
+          VERSION_CODE=$(git rev-list --count HEAD)
+          VERSION_NAME="1.0.0"
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
 
       - name: Build APK
-        run: |
-          BRANCH=${GITHUB_REF##*/}
-          if [[ "$BRANCH" == "staging" ]]; then
-            ./gradlew assembleReleaseDebug -PversionCode=${VERSION_CODE} -PversionName=${VERSION_NAME}
-          elif [[ "$BRANCH" == "main" ]]; then
-            ./gradlew assembleRelease -PversionCode=${VERSION_CODE} -PversionName=${VERSION_NAME}
-          fi
+        run: ./gradlew assembleRelease -PversionCode=${VERSION_CODE} -PversionName=${VERSION_NAME}
 
       - name: List APK files
         run: ls -lR app/build/outputs/apk/
 
       - name: Set APK Path
-        run: |
-          BRANCH=${GITHUB_REF##*/}
-          if [[ "$BRANCH" == "main" ]]; then
-            echo "APK_PATH=app/build/outputs/apk/release/app-release.apk" >> $GITHUB_ENV
-          elif [[ "$BRANCH" == "staging" ]]; then
-            echo "APK_PATH=app/build/outputs/apk/releaseDebug/app-releaseDebug.apk" >> $GITHUB_ENV
-          fi
+        run: echo "APK_PATH=app/build/outputs/apk/release/app-release.apk" >> $GITHUB_ENV
 
       - name: Upload APK to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
