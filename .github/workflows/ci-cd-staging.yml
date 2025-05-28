@@ -41,11 +41,11 @@ jobs:
       - name: Build APK
         run: ./gradlew assembleReleaseDebug -PversionCode=${VERSION_CODE} -PversionName=${VERSION_NAME}
 
-      - name: List APK files
-        run: ls -lR app/build/outputs/apk/
-
-      - name: Set APK Path
-        run: echo "APK_PATH=app/build/outputs/apk/releaseDebug/app-releaseDebug.apk" >> $GITHUB_ENV
+      - name: Rename APK file with custom name
+        run: |
+          NEW_APK_NAME="cinescope-staging-${VERSION_NAME}(${VERSION_CODE}).apk"
+          mv app/build/outputs/apk/releaseDebug/app-releaseDebug.apk $NEW_APK_NAME
+          echo "APK_PATH=$NEW_APK_NAME" >> $GITHUB_ENV
 
       - name: Upload APK to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
