@@ -51,7 +51,7 @@ jobs:
 
       - name: Rename APK file with custom name
         run: |
-          NEW_APK_NAME="cinescope-main-${VERSION_NAME}(${VERSION_CODE}).apk"
+          NEW_APK_NAME="cinescope-main-${VERSION_NAME}-${VERSION_CODE}.apk"
           mv app/build/outputs/apk/release/app-release.apk $NEW_APK_NAME
           echo "APK_PATH=$NEW_APK_NAME" >> $GITHUB_ENV
 
