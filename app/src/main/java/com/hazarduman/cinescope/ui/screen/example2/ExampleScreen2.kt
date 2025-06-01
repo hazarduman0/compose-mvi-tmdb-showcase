@@ -11,25 +11,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.hazarduman.cinescope.ui.base.BaseView
 import com.hazarduman.cinescope.ui.components.Spacer
 
 @Composable
 fun ExampleScreen2(
+    viewModel: ExampleScreen2ViewModel,
     navController: NavController
 ) {
-    Column(
-        Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Example Screen 2", style = MaterialTheme.typography.bodyLarge)
-        Spacer(10.dp)
-        Button(
-            onClick = {
-                navController.popBackStack()
-            }
+    BaseView(viewModel = viewModel, navController = navController) { uiState, onEvent ->
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text("Back to Example Screen 1")
+            Text(uiState.exampleText, style = MaterialTheme.typography.bodyLarge)
+            Spacer(10.dp)
+            Button(
+                onClick = {
+                    onEvent(ExampleScreen2UiEvent.OnBackToExampleScreen1)
+                }
+            ) {
+                Text("Back to Example Screen 1")
+            }
         }
     }
 }

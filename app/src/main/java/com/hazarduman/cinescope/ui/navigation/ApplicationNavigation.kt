@@ -1,14 +1,20 @@
 package com.hazarduman.cinescope.ui.navigation
 
-import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.hazarduman.cinescope.ui.screen.example1.ExampleScreen1
+import com.hazarduman.cinescope.ui.screen.example1.ExampleScreen1ViewModel
 import com.hazarduman.cinescope.ui.screen.example2.ExampleScreen2
+import com.hazarduman.cinescope.ui.screen.example2.ExampleScreen2ViewModel
 
 private const val ANIMATION_DURATION = 500
 
@@ -51,10 +57,18 @@ fun ApplicationNavigation(
         }
     ) {
         composable(Route.EXAMPLE_SCREEN_ROUTE_1.name) {
-            ExampleScreen1(navController = navController)
+            val viewModel = hiltViewModel<ExampleScreen1ViewModel>()
+            ExampleScreen1(
+                viewModel = viewModel,
+                navController = navController
+            )
         }
         composable(Route.EXAMPLE_SCREEN_ROUTE_2.name) {
-            ExampleScreen2(navController = navController)
+            val viewModel = hiltViewModel<ExampleScreen2ViewModel>()
+            ExampleScreen2(
+                viewModel = viewModel,
+                navController = navController
+            )
         }
     }
 }
