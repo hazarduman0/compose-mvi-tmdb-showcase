@@ -11,26 +11,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.hazarduman.cinescope.ui.base.BaseView
 import com.hazarduman.cinescope.ui.components.Spacer
-import com.hazarduman.cinescope.ui.navigation.Route
 
 @Composable
 fun ExampleScreen1(
+    viewModel: ExampleScreen1ViewModel,
     navController: NavController
 ) {
-    Column(
-        Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Example Screen 1", style = MaterialTheme.typography.bodyLarge)
-        Spacer(10.dp)
-        Button(
-            onClick = {
-                navController.navigate(Route.EXAMPLE_SCREEN_ROUTE_2.name)
-            }
+    BaseView(viewModel = viewModel, navController = navController) { uiState, onEvent ->
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text("Navigate to Example Screen 2")
+            Text(uiState.exampleText, style = MaterialTheme.typography.bodyLarge)
+            Spacer(10.dp)
+            Button(
+                onClick = {
+                    onEvent(ExampleScreen1UiEvent.OnNavigateToExampleScreen2)
+                }
+            ) {
+                Text("Navigate to Example Screen 2")
+            }
         }
     }
 }
