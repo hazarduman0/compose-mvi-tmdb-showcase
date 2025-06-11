@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
+import com.hazarduman.cinescope.ui.navigation.NavigationType
 import kotlinx.coroutines.flow.collectLatest
 
 /**
@@ -60,33 +61,33 @@ private fun <E, S> HandleNavigationEvents(
     LaunchedEffect(viewModel) {
         viewModel.navigationEvent.collectLatest { command ->
             when (command) {
-                is NavigationCommand.To -> {
+                is NavigationType.To -> {
                     navController.navigate(
                         command.route,
                         navOptions = navOptions { launchSingleTop = true }
                     )
                 }
-                is NavigationCommand.Back -> {
+                is NavigationType.Back -> {
                     if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
                         navController.popBackStack()
                     }
                 }
-                is NavigationCommand.BackTo -> {
+                is NavigationType.BackTo -> {
                     // TODO: Implement BackTo navigation
                 }
-                NavigationCommand.BackToRoot -> {
+                NavigationType.BackToRoot -> {
                     // TODO: Implement BackToRoot navigation
                 }
-                NavigationCommand.Exit -> {
+                NavigationType.Exit -> {
                     // TODO: Implement Exit navigation
                 }
-                is NavigationCommand.NavigateForResult -> {
+                is NavigationType.NavigateForResult -> {
                     // TODO: Implement NavigateForResult
                 }
-                NavigationCommand.PopUpToInclusive -> {
+                NavigationType.PopUpToInclusive -> {
                     // TODO: Implement PopUpToInclusive
                 }
-                is NavigationCommand.Replace -> {
+                is NavigationType.Replace -> {
                     // TODO: Implement Replace navigation
                 }
             }

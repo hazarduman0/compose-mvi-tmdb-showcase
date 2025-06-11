@@ -2,6 +2,7 @@ package com.hazarduman.cinescope.ui.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hazarduman.cinescope.ui.navigation.NavigationType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +27,7 @@ open class BaseViewModel<E, S>(
      */
     val uiState: StateFlow<S> = _uiState.asStateFlow()
 
-    private val _navigationEvent = Channel<NavigationCommand>(Channel.BUFFERED)
+    private val _navigationEvent = Channel<NavigationType>(Channel.BUFFERED)
     /**
      * Emits navigation commands to be handled by the UI layer.
      */
@@ -52,7 +53,7 @@ open class BaseViewModel<E, S>(
      *
      * @param command The navigation command.
      */
-    fun navigate(command: NavigationCommand) {
+    fun navigate(command: NavigationType) {
         viewModelScope.launch {
             _navigationEvent.send(command)
         }
