@@ -1,7 +1,7 @@
 package com.hazarduman.cinescope.ui.screen.example2
 
 import com.hazarduman.cinescope.ui.base.BaseViewModel
-import com.hazarduman.cinescope.ui.base.NavigationCommand
+import com.hazarduman.cinescope.ui.navigation.NavigationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -18,6 +18,6 @@ class ExampleScreen2ViewModel @Inject constructor() :
     }
 
     private fun onBackToExampleScreen1() {
-        navigate(NavigationCommand.Back)
+        navigate(NavigationType.Back)
     }
 }

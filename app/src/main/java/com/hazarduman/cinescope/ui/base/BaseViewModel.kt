@@ -1,7 +1,12 @@
 package com.hazarduman.cinescope.ui.base
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hazarduman.cinescope.ui.model.SnackBarType
+import com.hazarduman.cinescope.ui.navigation.NavigationType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +31,7 @@ open class BaseViewModel<E, S>(
      */
     val uiState: StateFlow<S> = _uiState.asStateFlow()
 
-    private val _navigationEvent = Channel<NavigationCommand>(Channel.BUFFERED)
+    private val _navigationEvent = Channel<NavigationType>(Channel.BUFFERED)
     /**
      * Emits navigation commands to be handled by the UI layer.
      */
@@ -34,7 +39,7 @@ open class BaseViewModel<E, S>(
 
     private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
     /**
-     * Emits UI events (snackbar, dialog, etc.) to be handled by the UI layer.
+     * Emits UI events (snackBar, dialog, etc.) to be handled by the UI layer.
      */
     val uiEvent = _uiEvent.receiveAsFlow()
 
@@ -52,7 +57,7 @@ open class BaseViewModel<E, S>(
      *
      * @param command The navigation command.
      */
-    fun navigate(command: NavigationCommand) {
+    fun navigate(command: NavigationType) {
         viewModelScope.launch {
             _navigationEvent.send(command)
         }
@@ -77,4 +82,9 @@ open class BaseViewModel<E, S>(
     protected fun updateState(newState: S) {
         _uiState.value = newState
     }
+
+    /**
+     * Holds the last SnackBarType in the ViewModel.
+     */
+    var lastSnackBarType: SnackBarType? by mutableStateOf(null)
 }

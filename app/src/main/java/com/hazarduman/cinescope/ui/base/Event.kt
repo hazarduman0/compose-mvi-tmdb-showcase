@@ -1,18 +1,9 @@
 package com.hazarduman.cinescope.ui.base
 
-sealed class NavigationCommand {
-    data class To(val route: String, val args: Map<String, String> = emptyMap()) : NavigationCommand()
-    data object Back : NavigationCommand()
-    data class BackTo(val route: String) : NavigationCommand()
-    data object BackToRoot : NavigationCommand()
-    data object PopUpToInclusive : NavigationCommand()
-    data class Replace(val route: String, val args: Map<String, String> = emptyMap()) : NavigationCommand()
-    data class NavigateForResult(val route: String, val requestKey: String) : NavigationCommand()
-    data object Exit : NavigationCommand()
-}
+import com.hazarduman.cinescope.ui.model.SnackBarType
 
 sealed class UiEvent {
-    data class ShowSnackBar(val message: String) : UiEvent()
+    data class ShowSnackBar(val snackBarType: SnackBarType) : UiEvent()
     data object ShowBottomSheet : UiEvent()
     data object ShowDialog : UiEvent()
     data class ShowToast(val message: String) : UiEvent()
