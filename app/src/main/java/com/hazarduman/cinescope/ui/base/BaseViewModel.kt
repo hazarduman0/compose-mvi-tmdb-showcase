@@ -1,7 +1,11 @@
 package com.hazarduman.cinescope.ui.base
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hazarduman.cinescope.ui.model.SnackBarType
 import com.hazarduman.cinescope.ui.navigation.NavigationType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +39,7 @@ open class BaseViewModel<E, S>(
 
     private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
     /**
-     * Emits UI events (snackbar, dialog, etc.) to be handled by the UI layer.
+     * Emits UI events (snackBar, dialog, etc.) to be handled by the UI layer.
      */
     val uiEvent = _uiEvent.receiveAsFlow()
 
@@ -78,4 +82,9 @@ open class BaseViewModel<E, S>(
     protected fun updateState(newState: S) {
         _uiState.value = newState
     }
+
+    /**
+     * Holds the last SnackBarType in the ViewModel.
+     */
+    var lastSnackBarType: SnackBarType? by mutableStateOf(null)
 }

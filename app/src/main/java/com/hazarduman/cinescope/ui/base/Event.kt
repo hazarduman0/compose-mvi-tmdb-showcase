@@ -1,7 +1,9 @@
 package com.hazarduman.cinescope.ui.base
 
+import com.hazarduman.cinescope.ui.model.SnackBarType
+
 sealed class UiEvent {
-    data class ShowSnackBar(val message: String) : UiEvent()
+    data class ShowSnackBar(val snackBarType: SnackBarType) : UiEvent()
     data object ShowBottomSheet : UiEvent()
     data object ShowDialog : UiEvent()
     data class ShowToast(val message: String) : UiEvent()
