@@ -1,5 +1,6 @@
 package com.hazarduman.cinescope.ui.base
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,11 +16,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavController
-import androidx.navigation.navOptions
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import com.hazarduman.cinescope.ui.components.BottomBar
 import com.hazarduman.cinescope.ui.components.SnackBar
 import com.hazarduman.cinescope.ui.components.TopAppBar
@@ -27,28 +28,29 @@ import com.hazarduman.cinescope.ui.model.BottomBarType
 import com.hazarduman.cinescope.ui.model.SnackBarType
 import com.hazarduman.cinescope.ui.model.TopBarType
 import com.hazarduman.cinescope.ui.navigation.NavigationType
+import com.hazarduman.cinescope.ui.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
- * A generic base Composable for screens, handling UI state, navigation, and UI events.
+ * Generic base Composable for screens. Handles UI state, navigation, and UI events.
  *
  * @param E The type of events handled by the ViewModel.
  * @param S The type of UI state exposed by the ViewModel.
  * @param VM The ViewModel type, extending [BaseViewModel].
  * @param viewModel The ViewModel instance.
- * @param navController The NavController for navigation actions.
- * @param compactLayout The Composable layout for compact screens, receiving the current UI state and an event dispatcher.
- * @param expandedLayout The Composable layout for expanded screens, receiving the current UI state and an event dispatcher.
- * @param topBarType The type of top bar to be displayed.
- * @param bottomBarType The type of bottom bar to be displayed.
+ * @param backStack The Navigation 3 back stack.
+ * @param topBarType Lambda to provide the top bar type based on UI state and event dispatcher.
+ * @param bottomBarType Lambda to provide the bottom bar type based on UI state and event dispatcher.
+ * @param compactLayout Composable layout for compact screens.
+ * @param expandedLayout Composable layout for expanded screens.
  */
 @Composable
 fun <E, S, VM : BaseViewModel<E, S>> BaseView(
     viewModel: VM,
-    navController: NavController,
+    backStack: NavBackStack,
     topBarType: @Composable (uiState: S, onEvent: (E) -> Unit) -> TopBarType = { _, _ -> TopBarType.NoTopBar },
     bottomBarType: @Composable (uiState: S, onEvent: (E) -> Unit) -> BottomBarType = { _, _ -> BottomBarType.NoBottomBar },
     compactLayout: @Composable (uiState: S, onEvent: (E) -> Unit) -> Unit,
@@ -58,7 +60,7 @@ fun <E, S, VM : BaseViewModel<E, S>> BaseView(
     val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    HandleNavigationEvents(viewModel, navController)
+    HandleNavigationEvents(viewModel, backStack)
     HandleUiEvents(viewModel, snackBarHostState, coroutineScope)
 
     val isExpanded = isExpandedScreen()
@@ -111,27 +113,22 @@ private fun isExpandedScreen(): Boolean {
 }
 
 /**
- * Collects and handles navigation events from the ViewModel.
+ * Collects and handles navigation events from the ViewModel, updating the back stack accordingly.
  */
 @Composable
 private fun <E, S> HandleNavigationEvents(
     viewModel: BaseViewModel<E, S>,
-    navController: NavController
+    backStack: NavBackStack
 ) {
     LaunchedEffect(viewModel) {
         viewModel.navigationEvent.collectLatest { command ->
             when (command) {
                 is NavigationType.To -> {
-                    navController.navigate(
-                        command.route,
-                        navOptions = navOptions { launchSingleTop = true }
-                    )
+                    backStack.addIfNotOnTop(command.screen)
                 }
 
                 is NavigationType.Back -> {
-                    if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-                        navController.popBackStack()
-                    }
+                    backStack.popIfNotEmpty()
                 }
 
                 is NavigationType.BackTo -> {
@@ -176,9 +173,8 @@ private fun <E, S> HandleUiEvents(
             when (event) {
                 is UiEvent.ShowSnackBar -> {
                     coroutineScope.launch {
-
-                        if (snackBarHostState.currentSnackbarData != null) {
-                            snackBarHostState.currentSnackbarData?.dismiss()
+                        snackBarHostState.currentSnackbarData?.let {
+                            it.dismiss()
                             delay(100)
                         }
 
@@ -244,5 +240,22 @@ private fun <E, S> HandleUiEvents(
                 }
             }
         }
+    }
+}
+
+private fun SnapshotStateList<NavKey>.addIfNotOnTop(screen: Screen) {
+    if (lastOrNull() != screen) {
+        add(screen)
+    }
+}
+
+private fun SnapshotStateList<NavKey>.popIfNotEmpty() {
+    if (size > 1) {
+        removeLastOrNull()
+    } else {
+        Log.w(
+            "BaseView",
+            "Attempted to remove last item from back stack, but only one item remains."
+        )
     }
 }

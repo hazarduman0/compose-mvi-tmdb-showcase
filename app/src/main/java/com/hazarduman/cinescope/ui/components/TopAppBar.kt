@@ -38,9 +38,7 @@ fun TopAppBar(
                     .height(topBarHeight),
                 title = { /* No title */ },
                 navigationIcon = {
-                    IconButton(onClick = { topBarType.onBack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
+                    BackIconButton(onClick = topBarType.onBack)
                 },
                 actions = {
                     val actions = topBarType.actions
@@ -123,9 +121,7 @@ fun TopAppBar(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(onClick = { topBarType.onBack() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
+                        BackIconButton(onClick = topBarType.onBack)
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -156,9 +152,7 @@ fun TopAppBar(
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = { topBarType.onBack() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
+                        BackIconButton(onClick = topBarType.onBack)
                     },
                     actions = {
                         val actions = topBarType.actions
@@ -177,6 +171,13 @@ fun TopAppBar(
                 topBarType.content()
             }
         }
+    }
+}
+
+@Composable
+private fun BackIconButton(onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
     }
 }
 

@@ -1,7 +1,7 @@
 package com.hazarduman.cinescope.ui.navigation
 
 sealed class NavigationType {
-    data class To(val route: String, val args: Map<String, String> = emptyMap()) : NavigationType()
+    data class To(val screen: Screen) : NavigationType()
     data object Back : NavigationType()
     data class BackTo(val route: String) : NavigationType()
     data object BackToRoot : NavigationType()

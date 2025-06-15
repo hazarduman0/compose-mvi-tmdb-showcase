@@ -2,9 +2,9 @@ package com.hazarduman.cinescope.ui.screen.example1
 
 import com.hazarduman.cinescope.ui.base.BaseViewModel
 import com.hazarduman.cinescope.ui.base.UiEvent
-import com.hazarduman.cinescope.ui.navigation.NavigationType
-import com.hazarduman.cinescope.ui.navigation.Route
 import com.hazarduman.cinescope.ui.model.SnackBarType
+import com.hazarduman.cinescope.ui.navigation.NavigationType
+import com.hazarduman.cinescope.ui.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -29,8 +29,7 @@ class ExampleScreen1ViewModel @Inject constructor() :
     private fun navigateToExampleScreen2() {
         navigate(
             NavigationType.To(
-                route = Route.EXAMPLE_SCREEN_ROUTE_2.name,
-                args = mapOf()
+                screen = Screen.ExampleScreen2(data = "Example Screen 2 Navigation Data")
             )
         )
     }
