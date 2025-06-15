@@ -5,14 +5,15 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
     jacoco
 }
 
 android {
     namespace = "com.hazarduman.cinescope"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.hazarduman.cinescope"
@@ -123,21 +124,39 @@ tasks.register<JacocoReport>("jacocoViewModelUnitTestReport") {
 }
 
 dependencies {
-    // --- Production dependencies ---
+    // --- Core ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+
+    // --- Compose ---
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.accompanist.navigation.animation)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.adaptive.layout)
+    implementation(libs.androidx.material3.windowsizeclass)
+
+    // --- Accompanist ---
+    //implementation(libs.accompanist.navigation.animation)
+
+    // --- Navigation 3 ---
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.material3.navigation3)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+    // --- Hilt ---
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
+    //kapt(libs.hilt.android.compiler)
+    ksp(libs.hilt.compiler)
 
-    // --- Annotation processors (KAPT) ---
-    kapt(libs.hilt.android.compiler)
+    // --- Serialization ---
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.serialization.json)
 
     // --- Unit test dependencies ---
     testImplementation(libs.junit)
@@ -151,8 +170,4 @@ dependencies {
     // --- Debug-only dependencies ---
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-}
-
-kapt {
-    correctErrorTypes = true
 }
