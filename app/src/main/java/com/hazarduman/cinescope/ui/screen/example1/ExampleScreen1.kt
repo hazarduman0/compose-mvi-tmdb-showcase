@@ -16,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation3.runtime.NavBackStack
 import com.hazarduman.cinescope.R
 import com.hazarduman.cinescope.ui.base.BaseView
 import com.hazarduman.cinescope.ui.model.BottomBarItem
@@ -27,11 +27,11 @@ import com.hazarduman.cinescope.ui.model.TopBarType
 @Composable
 fun ExampleScreen1(
     viewModel: ExampleScreen1ViewModel,
-    navController: NavController
+    backStack: NavBackStack
 ) {
     BaseView(
         viewModel = viewModel,
-        navController = navController,
+        backStack = backStack,
         topBarType = { _, _ ->
             TopBarType.TitleTopBar("Example Screen 1")
         },

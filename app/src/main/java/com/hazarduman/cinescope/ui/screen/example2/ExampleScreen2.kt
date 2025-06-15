@@ -10,20 +10,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation3.runtime.NavBackStack
 import com.hazarduman.cinescope.ui.base.BaseView
 import com.hazarduman.cinescope.ui.components.Spacer
-import com.hazarduman.cinescope.ui.model.TopBarType
 import com.hazarduman.cinescope.ui.model.BottomBarType
+import com.hazarduman.cinescope.ui.model.TopBarType
 
 @Composable
 fun ExampleScreen2(
     viewModel: ExampleScreen2ViewModel,
-    navController: NavController
+    backStack: NavBackStack
 ) {
     BaseView(
         viewModel = viewModel,
-        navController = navController,
+        backStack = backStack,
         topBarType = { _, onEvent ->
             TopBarType.BackTitleTopBar(
                 title = "Example Screen 2",
@@ -52,6 +52,8 @@ private fun ExampleScreen2CompactLayout(
     ) {
         Text(uiState.exampleText, style = MaterialTheme.typography.bodyLarge)
         Spacer(10.dp)
+        Text(uiState.navKey ?: "no data", style = MaterialTheme.typography.bodyLarge)
+        Spacer(10.dp)
         Button(
             onClick = {
                 onEvent(ExampleScreen2UiEvent.OnBackToExampleScreen1)
@@ -73,6 +75,8 @@ private fun ExampleScreen2ExpandedLayout(
         verticalArrangement = Arrangement.Center
     ) {
         Text(uiState.exampleText, style = MaterialTheme.typography.headlineMedium)
+        Spacer(10.dp)
+        Text(uiState.navKey ?: "no data", style = MaterialTheme.typography.bodyLarge)
         Spacer(10.dp)
         Button(
             onClick = {
