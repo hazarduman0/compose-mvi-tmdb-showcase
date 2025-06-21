@@ -4,11 +4,9 @@ import com.hazarduman.cinescope.ui.model.SnackBarType
 
 sealed class UiEvent {
     data class ShowSnackBar(val snackBarType: SnackBarType) : UiEvent()
-    data object ShowBottomSheet : UiEvent()
     data object ShowDialog : UiEvent()
     data class ShowToast(val message: String) : UiEvent()
     data class ShowAlertDialog(val title: String, val message: String) : UiEvent()
-    data object HideBottomSheet : UiEvent()
     data object HideDialog : UiEvent()
     data class NavigateToSettings(val reason: String? = null) : UiEvent()
     data object ShowLoading : UiEvent()

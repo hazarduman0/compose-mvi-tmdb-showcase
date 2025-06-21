@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +25,7 @@ import com.hazarduman.cinescope.R
 import com.hazarduman.cinescope.ui.base.BaseView
 import com.hazarduman.cinescope.ui.model.BottomBarItem
 import com.hazarduman.cinescope.ui.model.BottomBarType
+import com.hazarduman.cinescope.ui.model.FloatingActionButtonType
 import com.hazarduman.cinescope.ui.model.SnackBarType
 import com.hazarduman.cinescope.ui.model.TopBarType
 
@@ -72,6 +77,20 @@ fun ExampleScreen1(
                 }
             )
         },
+        floatingActionButtonType = { _, onEvent ->
+            FloatingActionButtonType.ExtendedFab(
+                onClick = {
+                    // Handle FAB click
+                },
+                text = "Add",
+                icon = {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = "Add"
+                    )
+                }
+            )
+        },
         compactLayout = { uiState, onEvent ->
             ExampleScreen1CompactLayout(uiState, onEvent)
         },
@@ -86,8 +105,13 @@ private fun ExampleScreen1CompactLayout(
     uiState: ExampleScreen1UiState,
     onEvent: (ExampleScreen1UiEvent) -> Unit
 ) {
+
+    val scrollState = rememberScrollState()
+
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
     ) {
@@ -108,8 +132,13 @@ private fun ExampleScreen1ExpandedLayout(
     uiState: ExampleScreen1UiState,
     onEvent: (ExampleScreen1UiEvent) -> Unit
 ) {
+
+    val scrollState = rememberScrollState()
+
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
     ) {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarData
@@ -21,10 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.hazarduman.cinescope.ui.components.AppFloatingActionButton
 import com.hazarduman.cinescope.ui.components.BottomBar
 import com.hazarduman.cinescope.ui.components.SnackBar
 import com.hazarduman.cinescope.ui.components.TopAppBar
 import com.hazarduman.cinescope.ui.model.BottomBarType
+import com.hazarduman.cinescope.ui.model.FloatingActionButtonType
 import com.hazarduman.cinescope.ui.model.SnackBarType
 import com.hazarduman.cinescope.ui.model.TopBarType
 import com.hazarduman.cinescope.ui.navigation.NavigationType
@@ -44,15 +47,18 @@ import kotlinx.coroutines.launch
  * @param backStack The Navigation 3 back stack.
  * @param topBarType Lambda to provide the top bar type based on UI state and event dispatcher.
  * @param bottomBarType Lambda to provide the bottom bar type based on UI state and event dispatcher.
+ * @param floatingActionButtonType Lambda to provide the floating action button type based on UI state and event dispatcher.
  * @param compactLayout Composable layout for compact screens.
  * @param expandedLayout Composable layout for expanded screens.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <E, S, VM : BaseViewModel<E, S>> BaseView(
     viewModel: VM,
     backStack: NavBackStack,
     topBarType: @Composable (uiState: S, onEvent: (E) -> Unit) -> TopBarType = { _, _ -> TopBarType.NoTopBar },
     bottomBarType: @Composable (uiState: S, onEvent: (E) -> Unit) -> BottomBarType = { _, _ -> BottomBarType.NoBottomBar },
+    floatingActionButtonType: @Composable (uiState: S, onEvent: (E) -> Unit) -> FloatingActionButtonType = { _, _ -> FloatingActionButtonType.NoFab },
     compactLayout: @Composable (uiState: S, onEvent: (E) -> Unit) -> Unit,
     expandedLayout: @Composable (uiState: S, onEvent: (E) -> Unit) -> Unit
 ) {
@@ -60,8 +66,16 @@ fun <E, S, VM : BaseViewModel<E, S>> BaseView(
     val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    HandleNavigationEvents(viewModel, backStack)
-    HandleUiEvents(viewModel, snackBarHostState, coroutineScope)
+    HandleNavigationEvents(
+        viewModel = viewModel,
+        backStack = backStack
+    )
+
+    HandleUiEvents(
+        viewModel = viewModel,
+        snackBarHostState = snackBarHostState,
+        coroutineScope = coroutineScope
+    )
 
     val isExpanded = isExpandedScreen()
 
@@ -84,8 +98,16 @@ fun <E, S, VM : BaseViewModel<E, S>> BaseView(
             }
         },
         floatingActionButton = {
-
+            AppFloatingActionButton(
+                floatingActionButtonType(uiState) { event -> viewModel.onEvent(event) }
+            )
         },
+        floatingActionButtonPosition = when (val fabType = floatingActionButtonType(uiState) { event -> viewModel.onEvent(event) }) {
+            is FloatingActionButtonType.SimpleFab -> fabType.fabPosition
+            is FloatingActionButtonType.ExtendedFab -> fabType.fabPosition
+            is FloatingActionButtonType.CustomFab -> fabType.fabPosition
+            else -> androidx.compose.material3.FabPosition.End
+        }
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -187,20 +209,12 @@ private fun <E, S> HandleUiEvents(
                     }
                 }
 
-                is UiEvent.ShowBottomSheet -> {
-                    // TODO: Implement ShowBottomSheet
-                }
-
                 is UiEvent.ShowDialog -> {
                     // TODO: Implement ShowDialog
                 }
 
                 is UiEvent.CopyToClipboard -> {
                     // TODO: Implement CopyToClipboard
-                }
-
-                UiEvent.HideBottomSheet -> {
-                    // TODO: Implement HideBottomSheet
                 }
 
                 UiEvent.HideDialog -> {
