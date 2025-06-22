@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarData
@@ -22,11 +23,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.hazarduman.cinescope.core.enums.BottomSheetStatus
+import com.hazarduman.cinescope.core.util.BottomSheetController
 import com.hazarduman.cinescope.ui.components.AppFloatingActionButton
 import com.hazarduman.cinescope.ui.components.BottomBar
+import com.hazarduman.cinescope.ui.components.BottomSheet
 import com.hazarduman.cinescope.ui.components.SnackBar
 import com.hazarduman.cinescope.ui.components.TopAppBar
+import com.hazarduman.cinescope.ui.components.rememberBottomSheetController
 import com.hazarduman.cinescope.ui.model.BottomBarType
+import com.hazarduman.cinescope.ui.model.BottomSheetExpandBehavior
 import com.hazarduman.cinescope.ui.model.FloatingActionButtonType
 import com.hazarduman.cinescope.ui.model.SnackBarType
 import com.hazarduman.cinescope.ui.model.TopBarType
@@ -65,6 +71,7 @@ fun <E, S, VM : BaseViewModel<E, S>> BaseView(
     val uiState by viewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val bottomSheetController = rememberBottomSheetController()
 
     HandleNavigationEvents(
         viewModel = viewModel,
@@ -74,6 +81,7 @@ fun <E, S, VM : BaseViewModel<E, S>> BaseView(
     HandleUiEvents(
         viewModel = viewModel,
         snackBarHostState = snackBarHostState,
+        bottomSheetController = bottomSheetController,
         coroutineScope = coroutineScope
     )
 
@@ -98,15 +106,18 @@ fun <E, S, VM : BaseViewModel<E, S>> BaseView(
             }
         },
         floatingActionButton = {
-            AppFloatingActionButton(
-                floatingActionButtonType(uiState) { event -> viewModel.onEvent(event) }
-            )
+            if (bottomSheetController.bottomSheetStatus == BottomSheetStatus.HIDDEN) {
+                AppFloatingActionButton(
+                    floatingActionButtonType(uiState) { event -> viewModel.onEvent(event) }
+                )
+            }
         },
-        floatingActionButtonPosition = when (val fabType = floatingActionButtonType(uiState) { event -> viewModel.onEvent(event) }) {
+        floatingActionButtonPosition = when (val fabType =
+            floatingActionButtonType(uiState) { event -> viewModel.onEvent(event) }) {
             is FloatingActionButtonType.SimpleFab -> fabType.fabPosition
             is FloatingActionButtonType.ExtendedFab -> fabType.fabPosition
             is FloatingActionButtonType.CustomFab -> fabType.fabPosition
-            else -> androidx.compose.material3.FabPosition.End
+            else -> FabPosition.End
         }
     ) { innerPadding ->
         Box(
@@ -120,6 +131,11 @@ fun <E, S, VM : BaseViewModel<E, S>> BaseView(
             } else {
                 compactLayout(uiState) { event -> viewModel.onEvent(event) }
             }
+
+            BottomSheet(
+                bottomSheetController = bottomSheetController,
+                coroutineScope = coroutineScope
+            )
         }
     }
 }
@@ -188,6 +204,7 @@ private fun <E, S> HandleNavigationEvents(
 private fun <E, S> HandleUiEvents(
     viewModel: BaseViewModel<E, S>,
     snackBarHostState: SnackbarHostState,
+    bottomSheetController: BottomSheetController,
     coroutineScope: CoroutineScope
 ) {
     LaunchedEffect(viewModel) {
@@ -206,6 +223,22 @@ private fun <E, S> HandleUiEvents(
                             message = event.snackBarType.message,
                             actionLabel = event.snackBarType.actionLabel
                         )
+                    }
+                }
+
+                UiEvent.CloseBottomSheet -> {
+                    bottomSheetController.hide(coroutineScope)
+                }
+
+                is UiEvent.ShowBottomSheet -> {
+                    Log.d(
+                        "BottomSheetCheckLog",
+                        "HandleUiEvents: ShowBottomSheet called with config: ${event.bottomSheetConfig}"
+                    )
+                    if (event.bottomSheetConfig.expandBehavior == BottomSheetExpandBehavior.FULLY_EXPANDED) {
+                        bottomSheetController.show(event.bottomSheetConfig)
+                    } else if (event.bottomSheetConfig.expandBehavior == BottomSheetExpandBehavior.HALF_EXPANDED) {
+                        bottomSheetController.halfExpand(event.bottomSheetConfig)
                     }
                 }
 

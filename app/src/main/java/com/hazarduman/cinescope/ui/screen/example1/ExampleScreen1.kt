@@ -25,6 +25,7 @@ import com.hazarduman.cinescope.R
 import com.hazarduman.cinescope.ui.base.BaseView
 import com.hazarduman.cinescope.ui.model.BottomBarItem
 import com.hazarduman.cinescope.ui.model.BottomBarType
+import com.hazarduman.cinescope.ui.model.BottomSheetConfig
 import com.hazarduman.cinescope.ui.model.FloatingActionButtonType
 import com.hazarduman.cinescope.ui.model.SnackBarType
 import com.hazarduman.cinescope.ui.model.TopBarType
@@ -119,6 +120,18 @@ private fun ExampleScreen1CompactLayout(
         SnackBarButtonRow(onEvent = onEvent)
         Button(
             onClick = {
+                onEvent(
+                    ExampleScreen1UiEvent.OnShowBottomSheet(
+                        bottomSheetConfig = BottomSheetConfig(
+                            content = { BottomSheetContent(onEvent) }
+                        )
+                    ))
+            }
+        ) {
+            Text("Show Bottom Sheet")
+        }
+        Button(
+            onClick = {
                 onEvent(ExampleScreen1UiEvent.OnNavigateToExampleScreen2)
             }
         ) {
@@ -146,10 +159,40 @@ private fun ExampleScreen1ExpandedLayout(
         SnackBarButtonRow(onEvent = onEvent)
         Button(
             onClick = {
+                onEvent(
+                    ExampleScreen1UiEvent.OnShowBottomSheet(
+                        bottomSheetConfig = BottomSheetConfig(
+                            content = { BottomSheetContent(onEvent) }
+                        )
+                    ))
+            }
+        ) {
+            Text("Show Bottom Sheet")
+        }
+        Button(
+            onClick = {
                 onEvent(ExampleScreen1UiEvent.OnNavigateToExampleScreen2)
             }
         ) {
             Text("Navigate to Example Screen 2")
+        }
+    }
+}
+
+@Composable
+private fun BottomSheetContent(
+    onEvent: (ExampleScreen1UiEvent) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+    ) {
+        Text("This is a bottom sheet", style = MaterialTheme.typography.bodyLarge)
+        Button(onClick = { onEvent(ExampleScreen1UiEvent.OnCloseBottomSheet) }) {
+            Text("Close Bottom Sheet")
         }
     }
 }

@@ -2,6 +2,7 @@ package com.hazarduman.cinescope.ui.screen.example1
 
 import com.hazarduman.cinescope.ui.base.BaseViewModel
 import com.hazarduman.cinescope.ui.base.UiEvent
+import com.hazarduman.cinescope.ui.model.BottomSheetConfig
 import com.hazarduman.cinescope.ui.model.SnackBarType
 import com.hazarduman.cinescope.ui.navigation.NavigationType
 import com.hazarduman.cinescope.ui.navigation.Screen
@@ -23,7 +24,17 @@ class ExampleScreen1ViewModel @Inject constructor() :
             }
 
             is ExampleScreen1UiEvent.OnShowSnackBar -> onShowSnackBar(event.snackBarType)
+            ExampleScreen1UiEvent.OnCloseBottomSheet -> onCloseBottomSheet()
+            is ExampleScreen1UiEvent.OnShowBottomSheet -> onShowBottomSheet(event.bottomSheetConfig)
         }
+    }
+
+    private fun onShowBottomSheet(bottomSheetConfig: BottomSheetConfig) {
+        sendUiEvent(UiEvent.ShowBottomSheet(bottomSheetConfig))
+    }
+
+    private fun onCloseBottomSheet() {
+        sendUiEvent(UiEvent.CloseBottomSheet)
     }
 
     private fun navigateToExampleScreen2() {
